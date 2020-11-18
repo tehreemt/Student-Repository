@@ -1,15 +1,19 @@
 """
 @author: Tehreem Tungekar
+This is HW11
 The main objective of this program is to
 begin to build the framework for a project and
 summarize student and instructor data
 This program has a class named University,
 a class named Student and another named Instructor
 Added a new class named Majors
+Added method to print Student Summary Grades
+using sqlite3
 """
 
 from prettytable import PrettyTable
 import csv
+import sqlite3
 from collections import defaultdict
 from typing import Tuple, Iterator, List, Set, Dict
 
@@ -73,18 +77,20 @@ class University:
 
         else:
             if tables:
-                print("\nMajors Table:")
+                print("\nMajors Summary:")
                 self.major_table()
-                print("\nStudent Table:")
+                print("\nStudent Summary:")
                 self.student_table()
-                print("\nInstructor Table:")
+                print("\nInstructor Summary:")
                 self.instructor_table()
+                print('\nStudent Grade Summary')
+                self.student_grades_table_db()
 
     def _get_students(self, path) -> None:
         """Student's details are read using file_reader method
         and added to students dictionary
         """
-        for cwid, name, major in file_reader(path, 3, sep=';', header=True):
+        for cwid, name, major in file_reader(path, 3, sep='\t', header=True):
             if major not in self._major:
                 print(f"Student {cwid} '{name}' has unknown major '{major}'")
             else:
@@ -93,14 +99,14 @@ class University:
     def _get_instructors(self, path) -> None:
         """Instructor's details are read using
         file_reader method and added to instructor dictionary"""
-        for cwid, name, dept in file_reader(path, 3, sep='|', header=True):
+        for cwid, name, dept in file_reader(path, 3, sep='\t', header=True):
             self._instructors[cwid] = Instructor(cwid, name, dept)
 
     def _get_grades(self, path) -> None:
         """Grades are read using file_reader
         method and assigned to student and instructor"""
         for std_cwid, course, grade, instructor_cwid in file_reader(
-                                            path, 4, sep='|', header=True):
+                                            path, 4, sep='\t', header=True):
             if std_cwid in self._students:
                 self._students[std_cwid].add_course(course, grade)
             else:
@@ -140,6 +146,20 @@ class University:
         table = PrettyTable(field_names=Major.FIELD_NAMES)
         for major in self._major.values():
                 table.add_row(major.info())
+        print(table)
+
+    def student_grades_table_db(self, db_path: str = "hw11.db") -> None:
+        """A new method to query database"""
+
+        try:
+            db = sqlite3.connect(db_path)
+        except (FileNotFoundError, ValueError) as e:
+            print(e)
+
+        table: PrettyTable = PrettyTable(
+            field_names=['Name', 'CWID', 'Course', 'Grade', 'Instructor'])
+        for row in db.execute("select students.Name,students.CWID,Course,Grade,instructors.name from students join grades on students.CWID= StudentCWID join instructors on InstructorCWID=instructors.CWID order by students.Name"):
+            table.add_row(row)
         print(table)
 
 
@@ -204,7 +224,7 @@ class Instructor:
         self._cwid: str = cwid
         self._name: str = name
         self._dept: str = dept
-        self._courses: DefaultDict[str, int] = defaultdict(int)
+        self._courses = defaultdict(int)
 
     def add_student(self, course: str) -> None:
         """Number of students taking course with Instructor"""
@@ -264,7 +284,7 @@ class Major:
 
 
 def main():
-    University('Homework_10')
+    University('Homework_11')
 
 
 if __name__ == '__main__':
