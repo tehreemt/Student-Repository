@@ -7,7 +7,8 @@ This is HW11
 """
 import unittest
 import sqlite3
-from Student_Repository_Tehreem_Tungekar import University, Student, Instructor, Major
+from Student_Repository_Tehreem_Tungekar import University
+from Student_Repository_Tehreem_Tungekar import Student, Instructor, Major
 
 
 class TestUniversity(unittest.TestCase):
@@ -53,16 +54,17 @@ class TestUniversity(unittest.TestCase):
 
     def test_instructor_attributes(self) -> None:
         """This function tests for Instructor details"""
-        expectIn = [[['98764', 'Cohen, R', 'SFEN', 'CS 546', 1],
-                    ['98763', 'Rowland, J', 'SFEN', 'SSW 810', 4],
-                    ['98763', 'Rowland, J', 'SFEN', 'SSW 555', 1],
-                    ['98762', 'Hawking, S', 'CS', 'CS 501', 1],
-                    ['98762', 'Hawking, S', 'CS', 'CS 546', 1],
-                    ['98762', 'Hawking, S', 'CS', 'CS 570', 1]]
+        expectIn = [('98764', 'Cohen, R', 'SFEN', 'CS 546', 1),
+                    ('98763', 'Rowland, J', 'SFEN', 'SSW 810', 4),
+                    ('98763', 'Rowland, J', 'SFEN', 'SSW 555', 1),
+                    ('98762', 'Hawking, S', 'CS', 'CS 501', 1),
+                    ('98762', 'Hawking, S', 'CS', 'CS 546', 1),
+                    ('98762', 'Hawking, S', 'CS', 'CS 570', 1)]
 
-        actual = [list(detail) for instructor in self.univ._instructors.values() for detail in instructor.info()]
-        self.assertEqual(expectIn, actual)
-
+        actualVal = [tuple(detail)
+                     for instructor in self.univ._instructors.values()
+                     for detail in instructor.info()]
+        self.assertEqual(expectIn, actualVal)
 
     def test_student_summary_table_db(self) -> None:
         """ Testing students summary table """
